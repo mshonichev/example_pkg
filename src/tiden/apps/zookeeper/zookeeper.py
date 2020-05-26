@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-from ..app import App, AppException
+from ..app import App
+from .. import AppException
 from ..nodestatus import NodeStatus
 from ...util import *
 

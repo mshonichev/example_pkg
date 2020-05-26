@@ -4,6 +4,7 @@ from .util import log_print, log_put, print_red, get_cur_timestamp
 from .tidenexception import TidenException
 from enum import Enum
 
+
 class TidenPluginException (TidenException):
     pass
 

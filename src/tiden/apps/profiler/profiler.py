@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-from ..app import App, MissedRequirementException, AppException
+from ..app import App
+from .. import AppException, MissedRequirementException
 from ...util import log_print
 import os
 

@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 
+import pluggy
+
 from .singleton import singleton
 from .tidenconfig import TidenConfig
 from .sshpool import SshPool
 from .nasmanager import NasManager
 from .result import ResultLinesCollector
+from . import hookspecs
+from . import tidenhooks
 
 @singleton
 class TidenFabric:
@@ -12,6 +16,7 @@ class TidenFabric:
     ssh_pool = None
     nas_manager = None
     result_lines_collector = None
+    hook_mgr = None
 
     def getSshPool(self):
         if self.ssh_pool is None:
@@ -51,3 +56,12 @@ class TidenFabric:
         if self.result_lines_collector is None:
             self.result_lines_collector = ResultLinesCollector(self.getConfig().obj)
         return self.result_lines_collector
+
+    def get_hook_mgr(self):
+        if self.hook_mgr is None:
+            self.hook_mgr = pluggy.PluginManager("tiden")
+            self.hook_mgr.add_hookspecs(hookspecs)
+            self.hook_mgr.load_setuptools_entrypoints("tiden")
+            self.hook_mgr.register(tidenhooks)
+        return self.hook_mgr
+

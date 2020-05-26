@@ -1,4 +1,5 @@
-from ..app import AppException
+from .. import AppException
+
 
 class IgniteException(AppException):
     pass

@@ -3,9 +3,13 @@
 from glob import glob
 from importlib import machinery, util
 from os import path
+from re import search
+from itertools import chain
+
 from .tidenplugin import TidenPluginException
 from .util import log_print
-from re import search
+from .tidenfabric import TidenFabric
+
 
 class PluginManager:
 
@@ -20,6 +24,8 @@ class PluginManager:
     def __init__(self, config):
         self.config = config
         self.plugins = {}
+        hook_mgr = TidenFabric().get_hook_mgr()
+        self.plugins_paths = list(chain(*hook_mgr.hook.tiden_get_plugins_path()))
         self.__import()
 
     def set(self, **kwargs):
@@ -32,23 +38,10 @@ class PluginManager:
         :return:
         """
         configured_plugins = self.config.get('plugins', {}).copy()
-        # Find modules
-        plugin_module_files = {}
-        for plugin_file in glob("%s/plugins/*.py" % path.dirname(path.abspath(__file__))):
-            # Ignore Tiden abstract plugin class and itself
-            if path.basename(plugin_file) in self.ignore_modules or plugin_file == path.abspath(__file__):
-                continue
-            # Scan plugin python files and check that the given class in config
-            class_name = None
-            with open(plugin_file) as r:
-                content = r.read()
-                m = search('\s*class\s*([a-zA-z0-9_]+)\s*\(\s*TidenPlugin\s*\)\s*:\s*\n', content)
-                if m:
-                    class_name = m.group(1)
-                    if not m.group(1) in configured_plugins.keys():
-                        continue
-                    else:
-                        plugin_module_files[class_name] = plugin_file
+        plugin_module_files = self.__find_plugin_modules(configured_plugins)
+        self.__initialize_plugins(configured_plugins, plugin_module_files)
+
+    def __initialize_plugins(self, configured_plugins, plugin_module_files):
         # Initialize the plugins
         for class_name in configured_plugins.keys():
             if not plugin_module_files.get(class_name):
@@ -76,6 +69,27 @@ class PluginManager:
                     = getattr(plugin_module, class_name)(class_name, self.config)
                 self.plugins[class_name] = preloaded_plugin_config
                 configured_plugins[class_name]['module'] = plugin_file
+
+    def __find_plugin_modules(self, configured_plugins):
+        # Find modules
+        plugin_module_files = {}
+        for plugins_path in self.plugins_paths:
+            for plugin_file in glob(path.join(plugins_path, "*.py")):
+                # Ignore Tiden abstract plugin class and itself
+                if path.basename(plugin_file) in self.ignore_modules or plugin_file == path.abspath(__file__):
+                    continue
+                # Scan plugin python files and check that the given class in config
+                class_name = None
+                with open(plugin_file) as r:
+                    content = r.read()
+                    m = search(r'\s*class\s*([a-zA-z0-9_]+)\s*\(\s*TidenPlugin\s*\)\s*:\s*\n', content)
+                    if m:
+                        class_name = m.group(1)
+                        if not class_name in configured_plugins.keys():
+                            continue
+                        else:
+                            plugin_module_files[class_name] = plugin_file
+        return plugin_module_files
 
     def do(self, point, *args, **kwargs):
         for name in self.plugins.keys():

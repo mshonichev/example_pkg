@@ -4,6 +4,11 @@ suites.mock.mock_test_module:
 - name: test_simple
 - name: test_simple
 - name: test_simple
+- name: test_simple
+- name: test_simple
+- name: test_simple
+- name: test_simple
+- name: test_simple
 suites.mock.mock_test_module_with_test_configuration:
 - name: test_main
 - name: test_zookeeper_only
@@ -21,7 +26,30 @@ suites.mock.mock_test_module_with_test_configuration:
 - name: test_zookeeper_only
 - name: test_main
 - name: test_zookeeper_only
+- name: test_main
+- name: test_zookeeper_only
+- name: test_main
+- name: test_zookeeper_only
+- name: test_main
+- name: test_zookeeper_only
+- name: test_main
+- name: test_zookeeper_only
+- name: test_main
+- name: test_zookeeper_only
+- name: test_main
+- name: test_zookeeper_only
+- name: test_main
+- name: test_zookeeper_only
+- name: test_main
+- name: test_zookeeper_only
+- name: test_main
+- name: test_zookeeper_only
 suites.mock.mock_test_module_with_test_configuration_subset:
+- name: test_whatever_more
+- name: test_whatever_more
+- name: test_whatever_more
+- name: test_whatever_more
+- name: test_whatever_more
 - name: test_whatever_more
 - name: test_whatever_more
 - name: test_whatever_more

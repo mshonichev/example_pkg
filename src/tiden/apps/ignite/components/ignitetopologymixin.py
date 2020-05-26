@@ -3,7 +3,7 @@ from sys import stdout
 from time import time, sleep
 
 from ...nodestatus import NodeStatus
-from ...app import AppException
+from ... import AppException
 from .ignitenodesmixin import IgniteNodesMixin
 from ....util import log_put, log_print, get_logger
 from ....tidenexception import TidenException

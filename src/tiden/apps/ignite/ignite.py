@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-from ..app import App, MissedRequirementException
+from ..app import App
+from .. import MissedRequirementException
 from ..nodestatus import NodeStatus
 from .ignitecomponents import IgniteComponents
 from ...sshpool import SshPool

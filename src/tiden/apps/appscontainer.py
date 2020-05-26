@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-from ..tidenexception import TidenException
 from .app import App
+from .appfactory import ApplicationFactory
+
 
 class AppsContainer:
     def __init__(self):
@@ -9,6 +10,7 @@ class AppsContainer:
         self.app_options = {}
         self.apps_created = False
         self.apps_packages = {}
+        self.apps_factory = ApplicationFactory()
 
     def add_app(self, app, **options):
         self.app_options[app] = {
@@ -30,12 +32,7 @@ class AppsContainer:
     def get_app_package(self, app_class_name, app_name):
         app_class_package_name = app_class_name.lower()
         if app_class_package_name not in self.apps_packages:
-            try:
-                app_pkg = __import__("tiden.apps.%s" % app_class_package_name, globals(), locals(), [app_class_name], 0)
-                self.apps_packages[app_class_package_name] = app_pkg
-            except ImportError as e:
-                raise TidenException("Can't import application class %s for application %s from package %s: %s" % (
-                    app_class_name, app_name.title(), "tiden.apps.%s.%s" % (app_class_package_name, app_class_name), e))
+            app_pkg = self.apps_factory.get_app_package(app_class_package_name, app_class_name, app_name)
         else:
             app_pkg = self.apps_packages[app_class_package_name]
         return app_pkg
