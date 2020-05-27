@@ -1,8 +1,11 @@
-from ...util import print_red, print_blue
+#!/usr/bin/env python3
 
 from re import match, findall
 from datetime import timedelta
 from yaml import add_representer, add_constructor
+
+from ...util import print_red, print_blue
+
 
 class LogTimeStamp(int):
     yaml_tag = '!time'

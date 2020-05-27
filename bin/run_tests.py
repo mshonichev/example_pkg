@@ -275,10 +275,13 @@ if __name__ == '__main__':
     logger = _get_default_logger(config)
     sys.path.insert(0, abspath(getcwd()))
 
+    pm = PluginManager(config)
+
     # prepare artifacts, artifact information is updated into config
     # this must be done before tests collections,
     # because some tests are applicable for specific artifacts only
     log_print('*** Prepare artifacts ***', color='blue')
+    pm.do('before_prepare_artifacts', config)
     remote_unzip_files, config = prepare(config)
 
     if collect_only:
@@ -289,7 +292,6 @@ if __name__ == '__main__':
         # otherwise, create ssh pool,
         # and prepare plugins to use it
         ssh_pool = init_ssh_pool(config)
-        pm = PluginManager(config)
         if pm.plugins:
             log_print('*** Plugins ***', color='blue')
             for name, plugin in pm.plugins.items():

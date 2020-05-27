@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-from ..app import App
-from .. import AppException, MissedRequirementException
-from ...util import log_print
 import os
+
+from ..app import App
+from ..appexception import AppException, MissedRequirementException
+from ...util import log_print
 
 
 class Profiler(App):
@@ -15,9 +16,11 @@ class Profiler(App):
                    "settings={JFC_PATH}"
     available_profilers = ('jfr', 'async_flamegraph')
 
-    def __init__(self, name, config, ssh):
+    def __init__(self, name, config, ssh, profiler=''):
         super().__init__(name, config, ssh, app_type='profiler')
-        self.type = self.config['environment']['yardstick'].get('profiler')
+        self.type = self.config['environment'].get('yardstick', {}).get('profiler')
+        if not self.type:
+            self.type = profiler
         if self.type not in self.available_profilers:
             raise AppException(f"Unknown profiler type {self.type}. Available types: {self.available_profilers}")
         self.async_profiler_home = os.path.join(self.config['remote']['suite_var_dir'], 'flamegraph', 'async_fmg')

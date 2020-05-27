@@ -7,7 +7,7 @@ The test framework for testing Apache Ignite in distributed environment
 
 ## 2. Requirements.
 
-Python 3.6 with installed modules on the host starting tests:
+Python 3.7 with installed modules on the host starting tests:
 * PyYaml
 * psutil
 * jinja2
@@ -26,7 +26,7 @@ java processes by `sudo killall -9 java`. Thus you must add killall to sudoers l
 ## 3. Command-line arguments.
 
 ```bash
-run-tests.py \
+run_tests.py \
   --tc=<path_to_configuration_file> \
   --tc=<path_to_configuration_file> \
   --to=<option_path>=<option_value> \
@@ -99,14 +99,14 @@ key1:
 If the original value is the list then new value can be provided as the string of values delimited by commas:
 
 ```bash
-./run-tests.py ... --to=<key_path>=value1,value2,value3
+run_tests.py ... --to=<key_path>=value1,value2,value3
 ```
 
 If you provide the `+` symbol before the list of values, then these values will be appended to ones already 
 set for the given configuration option:
 
 ```bash
-./run-tests.py ... --to=<key_path>=+value1,value2,value3
+run_tests.py ... --to=<key_path>=+value1,value2,value3
 ```
 
 ##### Clean
@@ -161,13 +161,16 @@ directory.
 6. The example:
 `suites/features/test_new_features.py`
 ```python
-from pt.singlegridtestcase import SingleGridTestCase
-from pt import *
-class TestNewFeatures (SingleGridTestCase):
+from tiden.case.generaltestcase import GeneralTestCase
+from tiden import attr
+
+class TestNewFeatures (GeneralTestCase):
     def setup(self):
         super().setup()
+        
     def teardown(self):
         pass
+        
     @attr('simple_test', 'new')
     def test_feature_1(self):
       a = 1
@@ -349,7 +352,7 @@ Supported requirements:
 
 
 ```python
-from pt.util import require
+from tiden.util import require
 ...
     @require(min_server_nodes=4, min_ignite_version='2.4.2-p4')
     def test_2(self):
@@ -361,8 +364,8 @@ Unnamed arguments to `@require` are evaluated during test compilation, any False
 which allows following example usage as well:
 
 ```python
-from pt.testconfig import test_config
-from pt.util import require
+from tiden.testconfig import test_config
+from tiden.util import require
 
 ...
     @require(test_config.ignite.pitr_enabled)
@@ -374,7 +377,7 @@ from pt.util import require
 * explicit repeated iterations `@repeated_test(<N>)` or `@repeate_test(<N>, test_names=[<test_names>])`. 
 
 ```python
-from pt.util import repeated_test
+from tiden.util import repeated_test
 
 ...
     @repeated_test(3)
@@ -400,6 +403,5 @@ Running unit tests requires installed `py.test` dependency.
 Example:
 
 ```bash
-    cd pt/
     py.test tests -x --tb=long  
 ```  

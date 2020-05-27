@@ -1,13 +1,5 @@
 #!/usr/bin/env python3
 
-from ..app import App
-from .. import MissedRequirementException
-from ..nodestatus import NodeStatus
-from .ignitecomponents import IgniteComponents
-from ...sshpool import SshPool
-
-from ...util import log_put, log_print, print_red, apply_tiden_functions, util_sleep_for_a_while
-
 from datetime import datetime
 from itertools import cycle
 from re import search
@@ -15,10 +7,14 @@ from time import sleep, time
 from traceback import format_exc
 from zipfile import ZipFile
 
-from .ignitecomponents import IgniteComponents
+from ..app import App
+from ..appexception import MissedRequirementException
 from ..nodestatus import NodeStatus
+from ...sshpool import SshPool
+from ...util import log_put, log_print, print_red, apply_tiden_functions, util_sleep_for_a_while
 from ...tidenexception import TidenException
 from ...report.steps import step
+from .ignitecomponents import IgniteComponents
 
 
 class Ignite(IgniteComponents, App):

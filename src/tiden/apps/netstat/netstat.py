@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-from ...util import *
 from time import sleep, time
+
+from ...util import *
 from ..app import App
 
 

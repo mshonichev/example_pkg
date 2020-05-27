@@ -9,12 +9,8 @@ class IgniteBinRestMixin(IgniteLogDataMixin):
 
         ignite = Ignite(...)
         ignite.cu.activate()
-
-        ignite.su.snapshot_utility('SNAPSHOT', '-type=FULL')
     """
-    _su = None
     _cu = None
-    _ru = None
 
     def __init__(self, *args, **kwargs):
         # print('IgniteBinRestMixin.__init__')
@@ -34,22 +30,6 @@ class IgniteBinRestMixin(IgniteLogDataMixin):
             local_regex='port ([0-9]+)',
             force_type='int'
         )
-
-    def get_snapshot_utility(self):
-        if self._su is None:
-            from tiden.utilities.snapshot_utility import SnapshotUtility
-            self._su = SnapshotUtility(self)
-        return self._su
-
-    su = property(get_snapshot_utility, None)
-
-    def get_replication_utility(self):
-        if self._ru is None:
-            from tiden.utilities.replication_utility import ReplicationUtility
-            self._ru = ReplicationUtility(self)
-        return self._ru
-
-    ru = property(get_replication_utility, None)
 
     def get_control_utility(self):
         if self._cu is None:

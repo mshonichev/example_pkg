@@ -12,7 +12,7 @@ if not version:
     raise RuntimeError('Cannot find version information')
 
 if not exists('requirements.txt'):
-    raise RuntimeError('Cannot find version information')
+    raise RuntimeError('Cannot find requirements information')
 
 with open('requirements.txt', 'r') as fd:
     requirements = [req.strip() for req in fd.readlines() if not req.strip().startswith('#')]

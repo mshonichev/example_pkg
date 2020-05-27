@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# from apps.app import App
+# from ..app import App
 from ..nodestatus import NodeStatus
 from ...util import log_print, log_put
 

@@ -1,6 +1,6 @@
 import tarfile
-from os import mkdir, walk, stat as file_stat, listdir, rename
-from os.path import abspath, join, pardir, exists, basename, dirname
+from os import mkdir, walk, listdir
+from os.path import abspath, join, pardir, exists, basename, dirname, getmtime
 from shutil import rmtree
 from time import time, sleep
 from zipfile import ZipFile
@@ -28,7 +28,7 @@ def c_time(path):
     """
     Creation time
     """
-    return file_stat(path).st_ctime_ns
+    return getmtime(path)
 
 
 @fixture
@@ -624,6 +624,7 @@ def test_repeat_upload_artifacts_changed_artifacts(temp_dir, prepare_artifacts_w
             assert actual_art_creation_time != previous_art_creation_times[artifact_name]
         else:
             assert actual_art_creation_time == previous_art_creation_times[artifact_name]
+
 
 # TODO: configuration restored from previous where new file not exist
 def repeat_upload_changed_artifacts(temp_dir, prepare_artifacts_with_ssh_structure):

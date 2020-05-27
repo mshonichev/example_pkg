@@ -33,6 +33,9 @@ class TidenPlugin:
     def log_put(self, msg, **kwargs):
         log_put("[%s][%s] %s" % (get_cur_timestamp(), self.name, msg), **kwargs)
 
+    def before_prepare_artifacts(self, *args, **kwargs):
+        pass
+
     def before_hosts_setup(self, *args, **kwargs):
         pass
 
