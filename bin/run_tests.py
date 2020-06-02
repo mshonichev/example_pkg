@@ -1,4 +1,18 @@
 #!/usr/bin/env python3
+#
+# Copyright 2017-2020 GridGain Systems.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from math import sqrt, floor
 from optparse import OptionParser
@@ -17,9 +31,11 @@ from tiden.tidenfabric import TidenFabric
 from tiden.tidenrunner import TidenRunner
 
 from tiden.__version__ import __version__
+
 version = 'Tiden ' + __version__
 
 collect_only = False
+
 
 class ConnectionMode(Enum):
     SSH = 'paramiko'
@@ -91,12 +107,8 @@ def process_args():
 
     # Force property's config
     for force_arg in options.to:
-        # if argument contain "=" character then just put quotes like  key='value'
-        string_args = search("^(.+)=\.(.*)\.$", force_arg)
-        if string_args:
-            option_name, option_value = string_args.group(1), string_args.group(2)
-        else:
-            option_name, option_value = force_arg.split('=')
+        # Handle force_arg values such as "environment.server_jvm_options=-DIGNITE_QUIET=false"
+        option_name, option_value = force_arg.split('=', 1)
         cfg(config, option_name, option_value)
         # self.logger.log("Configuration option %s=%s" % (option_name, option_value), 1)
     config['suite_name'] = None
@@ -117,7 +129,7 @@ def process_args():
     if collect_only:
         config['dir_prefix'] = f"collect-{strftime('%y%m%d-%H%M%S')}"
     else:
-        config['dir_prefix'] = "{}-{}" .format(config['suite_name'], strftime("%y%m%d-%H%M%S"))
+        config['dir_prefix'] = "{}-{}".format(config['suite_name'], strftime("%y%m%d-%H%M%S"))
 
     con_mode = config.get("connection_mode", "ssh")
     con_mode_found = [mode.value for mode in ConnectionMode if mode.name.lower() == con_mode]
@@ -138,12 +150,14 @@ def process_args():
     _fixup_hosts(config)
     return config
 
+
 def _fixup_hosts(config):
     """
     Ensure that all existing xxx_hosts configuration options are really arrays of hosts.
     :param config:
     :return:
     """
+
     def _fixup_hosts_config_option(cfg, option_name):
         """
         fixup given xxx_hosts configuration option to be array of hosts

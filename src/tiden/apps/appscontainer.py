@@ -1,7 +1,21 @@
 #!/usr/bin/env python3
+#
+# Copyright 2017-2020 GridGain Systems.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from .app import App
-from .appfactory import ApplicationFactory
+from .appfactory import AppFactory
 
 
 class AppsContainer:
@@ -10,7 +24,7 @@ class AppsContainer:
         self.app_options = {}
         self.apps_created = False
         self.apps_packages = {}
-        self.apps_factory = ApplicationFactory()
+        self.apps_factory = AppFactory()
 
     def add_app(self, app, **options):
         self.app_options[app] = {
@@ -33,6 +47,7 @@ class AppsContainer:
         app_class_package_name = app_class_name.lower()
         if app_class_package_name not in self.apps_packages:
             app_pkg = self.apps_factory.get_app_package(app_class_package_name, app_class_name, app_name)
+            self.apps_packages[app_class_package_name] = app_pkg
         else:
             app_pkg = self.apps_packages[app_class_package_name]
         return app_pkg

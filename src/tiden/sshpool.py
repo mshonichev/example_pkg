@@ -256,6 +256,9 @@ class SshPool(AbstractSshPool):
                 for line in stdout:
                     if line.strip() != '':
                         command_output += line
+                for line in stderr:
+                    if line.strip() != '':
+                        command_output += line
                 output.append(command_output)
                 formatted_output = ''.join(output).encode('utf-8')
                 get_logger('ssh_pool').debug(f'{host} << {formatted_output}')
