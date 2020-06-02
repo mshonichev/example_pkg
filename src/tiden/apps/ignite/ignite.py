@@ -14,6 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from copy import deepcopy
+from os import path, remove
+from os.path import exists
+
 from datetime import datetime
 from itertools import cycle
 from re import search
@@ -111,6 +115,10 @@ class Ignite(IgniteComponents, App):
     def _update_ignite_artifact_config_symlinks(self, ignite_name, artifact_name):
         # Find directory list for symlinks for remote hosts
         ignite_artifact_config = self.config['artifacts'][artifact_name]
+
+        if ignite_artifact_config.get('symlink_dirs'):
+            return ignite_artifact_config
+
         ignite_artifact_config['symlink_dirs'] = []
         try:
             if ignite_artifact_config.get('path'):
@@ -783,7 +791,7 @@ class Ignite(IgniteComponents, App):
             log_print('No node %s in the grid' % node_idx, color='red')
 
     def wait_for_messages_in_log(self, node_id, pattern, lines_limit=1000, timeout=200, interval=2, fail_pattern=None):
-        log, host = self.nodes.get(node_id).get('log'), self.nodes.get(node_id).get('host')
+        log, host = self.nodes.get(node_id, {}).get('log'), self.nodes.get(node_id).get('host')
         end_time = time() + timeout
         while time() < end_time:
             output = self.ssh.exec({host: [f'cat {log} | tail -n {lines_limit} | grep "{pattern}"']})
@@ -1193,87 +1201,197 @@ class Ignite(IgniteComponents, App):
                 return False
 
     def find_fails(self, *node_ids,
-                   files_to_check: dict = None,
-                   start_time=None,
-                   pattern='\\] Fail',
-                   lines_after=10,
-                   ignore_node_ids=False,
-                   grep_limit=5000):
+                   files_to_check: list = None,
+                   store_files=None,
+                   time_pattern=r'\[(\d+:\d+:\d+)(,\d+|)\]|T(\d+:\d+:\d+)(\.\d+|)',
+                   ignore_node_ids=False):
         """
-        Find fails in cluster logs and pack to list
+        Download log files one by one
+        Find fails in cluster logs and form it as dict
 
         :param node_ids:            custom nodes ids to search (all nodes by default)
         :param files_to_check:      path and host for file which needs to be checked
-        :param start_time:          time from which check will being made
-        :param pattern:             pattern to filter
-        :param lines_after:         lines after found line
-        :param ignore_node_ids:
-        :return: list[str]          fails strings list
+        :param store_files          directory where temp log files will be stored
+        :param ignore_node_ids:     ignore all received node_ids parameters
+        :return: dict               exception dict
+                                    Example:
+                                    {
+                                      'node.1.1.log': {
+                                         "exceptions": [
+                                            {
+                                               "line": 123,
+                                               "exception": [
+                                                  "Bad thin in log line #123\n",
+                                                  "Bad thin in log line #124\n",
+                                                  "Bad thin in log line #125\n",
+                                                  ....
+                                               ],
+                                               "time": datetime.datetime(2020, X, X, X)
+                                            }
+                                         ],
+                                         "body": [
+                                            # all log
+                                         ],
+                                         "file": {
+                                            "host": '172.25.1.XX',
+                                            "log_path": "/storage/ssd/.../node.1.1.log",
+                                            "node.1.1.log"
+                                         }
+                                      }
+                                    }
         """
         # all nodes by default
         node_ids = [] if ignore_node_ids else list(node_ids) if node_ids else list(self.nodes.keys())
 
         if files_to_check is None:
             files_to_check = []
-        commands = {}
-        finds = {}
 
-        # create commands for custom files
-        for log_to_check in files_to_check:
-            host = log_to_check['host']
-            commands[host] = commands.get(host, []) + [
-                f'grep -h -B 1 -A {lines_after} -E "{pattern}" {log_to_check["log_path"]} | tail -n {grep_limit}'
-            ]
-            finds[log_to_check['name']] = [host, len(commands[host]) - 1]
-
-        # create commands for selected nodes
         for node_id, node in self.nodes.items():
             if node_id not in node_ids:
                 continue
-            host = node['host']
-            commands[host] = commands.get(host, []) + [
-                f'grep -h -A {lines_after} -E "{pattern}" {node["log"]} | tail -n {grep_limit}'
-            ]
-            finds[node_id] = [host, len(commands[host]) - 1]
+            files_to_check.append({
+                'host': node['host'],
+                'log_path': node["log"],
+                'name': path.basename(node["log"])
+            })
 
-        res = self.ssh.exec(commands)
-        separate_results = {}
+        local_files = []
+        try:
+            found_exceptions = {}
+            for file_to_check in files_to_check:
+                local_file_path = path.join(store_files, file_to_check['name'])
+                local_files.append(local_file_path)
+                self.ssh.download_from_host(file_to_check['host'], file_to_check['log_path'], local_file_path)
+                with open(local_file_path, 'r') as f:
+                    all_lines = f.readlines()
+                    exception_list = self.find_exceptions_list(all_lines)
+                    if exception_list:
+                        found_exceptions[file_to_check['name']] = {
+                            'file': file_to_check,
+                            'exceptions': exception_list,
+                            'body': all_lines
+                        }
 
-        # find pattern
-        now_time = datetime.now()
-        format_date_now = f'{now_time.year}.{now_time.month}.{now_time.day}'
-        for node_id, find in finds.items():
-            errors = res[find[0]][find[1]].split('\n')
-            separate_errors = []
-            latest_idx = 0
-            for idx, error_line in enumerate(errors):
-                if error_line == '--':
-                    # several exceptions
-                    separate_errors.append(errors[latest_idx:idx])
-                    latest_idx = idx + 1
-
-            if latest_idx == 0:
-                separate_errors.append(errors)
-
-            new_errors = []
-            for error_lines in separate_errors:
-                add_to_results = True
-                time_is_found = False
-                for error_line in error_lines:
-                    if add_to_results and not time_is_found:
-                        found_time = search('\[(\d+:\d+:\d+),\d+\]', error_line)
-                        # from specific time
-                        if found_time:
+            now_time = datetime.now()
+            format_date_now = f'{now_time.year}.{now_time.month}.{now_time.day}'
+            for file_name, found_exception in deepcopy(found_exceptions).items():
+                for ex_idx, exception_info in enumerate(found_exception['exceptions']):
+                    time_is_found = False
+                    for line in exception_info['exception']:
+                        if found_exceptions[file_name]['exceptions'][ex_idx].get('time'):
+                            break
+                        found_time_str = search(time_pattern, line)
+                        if found_time_str and (found_time_str.group(1) or found_time_str.group(3)):
                             time_is_found = True
-                            found_time = found_time.group(1)
-                            found_time = datetime.strptime(f'{format_date_now} {found_time}', '%Y.%m.%d %H:%M:%S')
-                            if found_time < start_time:
-                                add_to_results = False
-                if add_to_results and error_lines != [""]:
-                    # add only after this time
-                    new_errors.append(error_lines)
-            separate_results[node_id] = new_errors
-        return separate_results
+                            found_time_str = found_time_str.group(1) or found_time_str.group(3)
+                            found_time = datetime.strptime(f'{format_date_now} {found_time_str}', '%Y.%m.%d %H:%M:%S')
+                            found_exceptions[file_name]['exceptions'][ex_idx]['time'] = found_time
+                            break
+                    if not time_is_found:
+                        upper_line = exception_info['line'] - 1
+                        for i in range(100):
+                            if upper_line < 0:
+                                break
+                            upper_line -= 1
+                            line_to_search = found_exception['body'][upper_line]
+                            found_time_str = search(time_pattern, line_to_search)
+                            if found_time_str and (found_time_str.group(1) or found_time_str.group(3)):
+                                found_time_str = found_time_str.group(1) or found_time_str.group(3)
+                                found_time = datetime.strptime(f'{format_date_now} {found_time_str}', '%Y.%m.%d %H:%M:%S')
+                                found_exceptions[file_name]['exceptions'][ex_idx]['time'] = found_time
+                                break
+        finally:
+            for file in local_files:
+                if exists(file):
+                    remove(file)
+        return found_exceptions
+
+    def find_exceptions_list(self, file_content,
+                             start_line_patterns=None,
+                             end_line_patterns=None):
+        """
+        Find all exceptions in file content and form it in list
+
+        :param      file_content:           open('filepath').readlines()
+        :param      start_line_patterns     re.compile(pattern) defined exception start line
+        :param      end_line_patterns       re.compile(pattern) defined exception end line
+        :return:    Example:
+                    [
+                       "line": 123,
+                       "exception": [
+                          "Bad thin in log line #123\n",
+                          "Bad thin in log line #124\n",
+                          "Bad thin in log line #125\n",
+                          ....
+                    ],
+        """
+        if start_line_patterns is None:
+            start_line_patterns = re.compile(
+                "^((Caused by:* )*class [a-zA-Z0-9\._]+Exception: "
+                "|java.lang.NullPointerException"
+                "|java.lang.[a-zA-Z0-9\._]+(Exception"
+                "|Error): )"
+                "|\] Fail"
+                "|\] Critical"
+                "|Error: Failed"
+                "|\(err\) Failed"
+                "|: Failed"
+            )
+
+        if end_line_patterns is None:
+            end_line_patterns = re.compile(
+                "\.\.\. \d+ more|"
+                'at java\.lang\.Thread\.run\(Thread\.java:\d+\)|'
+                'at org.apache.ignite.startup.cmdline.CommandLineStartup.main\(CommandLineStartup.java:\d+\)|'
+                'at org\.apache\.ignite.spi.IgniteSpiThread\.run\(IgniteSpiThread\.java:\d+\)|'
+                'at org\.apache\.ignite\.testtools\.SimpleIgniteTestClient\.main\(SimpleIgniteTestClient\.java:\d+\)'
+            )
+
+        exception_lines = []
+        exception_list = []
+
+        after_exception_end_line = False
+        in_exception_section = False
+        lines = file_content
+        lines_count = len(lines)
+
+        start_line = 0
+
+        for line_idx, line in enumerate(lines):
+            if in_exception_section:
+                if search(end_line_patterns, line):
+                    in_exception_section = False
+                    after_exception_end_line = True
+                    exception_lines.append(line.rstrip())
+            else:
+                # is start line
+                if not search('\[WARNING\]', line) and search(start_line_patterns, line):
+                    in_exception_section = True
+                    if line.startswith('Caused by') and after_exception_end_line:
+                        if len(exception_lines) > 0:
+                            exception_lines = exception_lines[:-1]
+                    else:
+
+                        if exception_lines:
+                            exception_list.append({
+                                'line': start_line,
+                                'exception': exception_lines
+                            })
+                        start_line = line_idx + 1
+                        exception_lines = []
+
+                after_exception_end_line = False
+            if in_exception_section:
+                exception_lines.append(line.rstrip())
+
+            if line_idx == lines_count - 1:
+                if exception_lines:
+                    exception_list.append({
+                        'line': start_line,
+                        'exception': exception_lines
+                    })
+
+        return exception_list
 
     def get_run_info(self, test_run_info=None):
         run_info = self._get_run_info_from_log()
