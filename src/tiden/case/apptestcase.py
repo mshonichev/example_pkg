@@ -41,7 +41,7 @@ class AppTestCase:
     def add_app(self, app, **kwargs):
         self.tiden.apps.add_app(app, **kwargs)
 
-    def get_app(self, app_name):
+    def get_app(self, app_name: str) -> App:
         return self.tiden.apps.get_app(app_name)
 
     def get_app_artifact_name(self, app_name):

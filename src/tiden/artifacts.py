@@ -146,6 +146,10 @@ def copy_artifacts(changed_artifacts, config):
     for artifact_name in config.get('artifacts', {}).keys():
         # copy artifacts
         pattern = config['artifacts'][artifact_name]['glob_path']
+
+        if pattern.startswith('ftp'):
+            continue
+
         found_files = glob(pattern)
         assert len(found_files) == 1, \
             "Found {} artifacts by pattern {}. Expected: 1".format(len(found_files), pattern)
@@ -223,6 +227,9 @@ def repack_and_get_command_to_unzip(previous_artifacts_config, copied_artifacts,
     command = []
     config_changes = {}
     for artifact_name in config.get('artifacts', {}).keys():
+        if config['artifacts'][artifact_name]['glob_path'].startswith('ftp'):
+            continue
+
         for source_file in glob(config['artifacts'][artifact_name]['glob_path']):
 
             # new path for artifact

@@ -26,7 +26,7 @@ import subprocess
 if 'win' in sys.platform and not 'darwin' in sys.platform:
     raise NotImplementedError("LocalPool not yet supported for Windows")
 
-debug_local_pool = True
+debug_local_pool = False
 
 
 class LocalPool(SshPool):

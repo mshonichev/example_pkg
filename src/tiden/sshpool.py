@@ -347,6 +347,20 @@ class SshPool(AbstractSshPool):
                     results.append({'host': host, 'owner': m.group(1), 'pid': m.group(2)})
         return results
 
+    def ls(self, hosts=None, dir_path=None, params=None):
+        ls_cmd = 'ls' if not params else 'ls {}'.format(params)
+        ls_command = ['{}'.format(ls_cmd)] if not dir_path else ['{} {}'.format(ls_cmd, dir_path)]
+
+        if hosts:
+            ls_command = {host: ls_command for host in hosts}
+
+        raw_results = self.exec(ls_command)
+        results = {}
+        for host in raw_results.keys():
+            results[host] = raw_results[host][0].split('\n')
+
+        return results
+
     def jps(self, jps_args=None, hosts=None, skip_reserved_java_processes=True):
         """
         Returns parsed and filtered for output of `jps` command executed on hosts.

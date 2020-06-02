@@ -24,8 +24,8 @@ from .result import ResultLinesCollector
 from . import hookspecs
 from . import tidenhooks
 
-@singleton
 
+@singleton
 class TidenFabric:
     config = None
     ssh_pool = None

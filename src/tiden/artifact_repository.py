@@ -46,8 +46,8 @@ class ApplicationRequirement(Requirement):
     def check(self, config):
         pass
 
-@singleton
 
+@singleton
 class ArtifactRepository:
 
     artifact_templates = {}

@@ -19,8 +19,8 @@ from ..tidenexception import TidenException
 from ..tidenfabric import TidenFabric
 from itertools import chain
 
-@singleton
 
+@singleton
 class AppFactory:
     def __init__(self):
         hook_mgr = TidenFabric().get_hook_mgr()
