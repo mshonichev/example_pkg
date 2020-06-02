@@ -1,9 +1,24 @@
 #!/usr/bin/env python3
+#
+# Copyright 2017-2020 GridGain Systems.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from tiden.tidenconfig import TidenConfig
 import pytest
 
 @pytest.fixture
+
 def example_config():
     c = TidenConfig({
         'clean': True,
@@ -94,8 +109,8 @@ def test_config_attr_ignite_version(example_config):
 def test_config_attr_gridgain_version(example_config):
     assert '8.4.2-p2' == example_config.gridgain_version
 
-
 @pytest.fixture
+
 def example_config_without_ignite():
     c = TidenConfig({
         'artifacts': {
@@ -110,8 +125,8 @@ def example_config_without_ignite():
     })
     return c
 
-
 @pytest.fixture
+
 def example_config_with_renamed_ignite():
     c = TidenConfig({
         'artifacts': {
@@ -139,8 +154,8 @@ def test_config_attr_ignite_by_name(example_config_with_renamed_ignite):
 def test_config_attr_unexistant_env_var(example_config_with_renamed_ignite):
     assert example_config_with_renamed_ignite.environment['servers_per_host'] is None
 
-
 @pytest.fixture
+
 def example_config_with_patches():
     c = TidenConfig({
         'simple': 45,
@@ -164,3 +179,4 @@ def test_config_attr_unexistant_env(example_config_with_patches):
 def test_negative_requirement(example_config):
     assert True == (not example_config.feature_enabled)
     assert False == bool(example_config.feature_enabled)
+

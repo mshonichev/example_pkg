@@ -1,3 +1,19 @@
+#!/usr/bin/env python3
+#
+# Copyright 2017-2020 GridGain Systems.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from os.path import join, dirname, basename, exists
 from tiden.localpool import LocalPool
 from copy import deepcopy
@@ -320,6 +336,7 @@ def test_runner_handle_general_exception_in_module_setup(with_dec_classpath, loc
     for status in res.statuses:
         assert res.get_tests_num(status) == 0
 
+
 def test_runner_handle_exceptions_in_module_teardown(with_dec_classpath, local_config, tmpdir, mock_pm):
     """
     Check that if we got exception in the module teardown tests will not be failed.
@@ -360,6 +377,7 @@ def test_runner_handle_exceptions_in_module_teardown(with_dec_classpath, local_c
         print(_tests)
         assert len(_tests) == 2
         assert res.get_tests_num('pass') == 2
+
 
 def test_runner_repeated_decorator(with_dec_classpath, local_config, tmpdir, mock_pm):
     """
@@ -722,6 +740,7 @@ def test_runner_repeated_test_option_particular_test(with_dec_classpath, local_c
     for status, count in expected_statuses_count.items():
         assert res.get_tests_num(status) == count
 
+
 def test_runner_repeated_test_continue_on_fail(with_dec_classpath, local_config, tmpdir, mock_pm):
     """
     This test is for testing test option repeated_test_continue_on_fail. It should have higher priority than decorator.
@@ -857,6 +876,7 @@ def test_runner_repeated_test_continue_on_fail(with_dec_classpath, local_config,
 
     for status, count in expected_statuses_count.items():
         assert res.get_tests_num(status) == count
+
 
 def test_runner_skipped_configurations(with_dec_classpath, local_config, tmpdir, mock_pm):
     """
@@ -1104,3 +1124,4 @@ def test_runner_run_negated_required_test_when_no_option_passed(with_dec_classpa
     # check all suite run id is the same
     suite_run_ids = set([test['suite_run_id'] for test in tr_report.values()])
     assert 1 == len(suite_run_ids)
+

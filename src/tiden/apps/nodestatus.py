@@ -16,6 +16,7 @@
 
 from enum import Enum
 
+
 class NodeStatus(Enum):
     NEW = 1
     STARTING = 2

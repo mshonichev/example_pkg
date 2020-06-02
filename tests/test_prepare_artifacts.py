@@ -1,3 +1,19 @@
+#!/usr/bin/env python3
+#
+# Copyright 2017-2020 GridGain Systems.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import tarfile
 from os import mkdir, walk, listdir
 from os.path import abspath, join, pardir, exists, basename, dirname, getmtime
@@ -30,8 +46,8 @@ def c_time(path):
     """
     return getmtime(path)
 
-
 @fixture
+
 def temp_dir(tmpdir_factory):
     fn = tmpdir_factory.mktemp("var")
     global var_dir
@@ -236,8 +252,8 @@ def make_local_structure(custom_config, exclude_property_dirs=None):
             del custom_config[exclude_property_dir]
     return custom_config
 
-
 @fixture
+
 def prepare_test_artifacts():
     global prepare_artifacts_result
     global config
@@ -248,8 +264,8 @@ def prepare_test_artifacts():
     # execute artifacts preparation
     prepare_artifacts_result, config = prepare(config)
 
-
 @fixture
+
 def prepare_without_local_structure():
     global config
     config = make_local_structure({}, exclude_property_dirs=['artifacts_dir', 'suite_var_dir', 'tmp_dir'])
@@ -265,8 +281,8 @@ def prepare_without_local_structure():
     }
     config.update(additional_configs)
 
-
 @fixture
+
 def prepare_remote_structure():
     global config
     config = {"clean": None}
@@ -279,8 +295,8 @@ def prepare_remote_structure():
     }
     config["ssh"].update(ssh_config)
 
-
 @fixture
+
 def prepare_artifacts_with_ssh_structure():
     global config
     global prepare_artifacts_result
@@ -297,8 +313,8 @@ def prepare_artifacts_with_ssh_structure():
     }
     config["ssh"].update(ssh_config)
 
-
 @fixture
+
 def simple_structure():
     global config
     global prepare_artifacts_result
@@ -625,8 +641,8 @@ def test_repeat_upload_artifacts_changed_artifacts(temp_dir, prepare_artifacts_w
         else:
             assert actual_art_creation_time == previous_art_creation_times[artifact_name]
 
-
 # TODO: configuration restored from previous where new file not exist
+
 def repeat_upload_changed_artifacts(temp_dir, prepare_artifacts_with_ssh_structure):
     """
     upload artifact
@@ -685,3 +701,4 @@ def test_repeat_upload_tar_artifacts(temp_dir, simple_structure):
         actual_dirs_list = listdir(art["remote_path"].replace("remote", "remote/127.0.0.1"))
         expected_dirs_list = for_repack if 'repack' in name else [for_repack[0]]
         assert sorted(actual_dirs_list) == sorted(expected_dirs_list)
+

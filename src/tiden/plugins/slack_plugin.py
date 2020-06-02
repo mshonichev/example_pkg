@@ -22,7 +22,6 @@ from subprocess import check_output
 
 TIDEN_PLUGIN_VERSION = '1.0.0'
 
-
 # For use - add down lines to default-plugins.yaml
 # SlackPlugin:
 # print_results: True

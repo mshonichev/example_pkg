@@ -24,6 +24,7 @@ from tiden.util import is_enabled
 
 TIDEN_PLUGIN_VERSION = '1.0.0'
 
+
 class TestResultsCollector(TidenPlugin):
 
     default_exclude_masks = ['*.bin', '*.dat', '*.jar', '*.wal', '*.zip', '*.tar', 'work/*']

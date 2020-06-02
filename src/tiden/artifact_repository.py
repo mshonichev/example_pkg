@@ -1,9 +1,25 @@
+#!/usr/bin/env python3
+#
+# Copyright 2017-2020 GridGain Systems.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from .singleton import singleton
 from .util import load_yaml
 from .tidenfabric import TidenFabric
 from .copy import deepcopy
 from .tidenexception import TidenException
+
 
 class Requirement:
     options = {}
@@ -12,6 +28,7 @@ class Requirement:
 
     def check(self, config):
         pass
+
 
 class ArtifactRequirement(Requirement):
     def check(self, config):
@@ -24,11 +41,13 @@ class ArtifactRequirement(Requirement):
         if not self.options['artifact_name'] in config['artifacts'].keys():
             raise TidenException("Required artifact '%s' missing" % self.options['artifact_name'])
 
+
 class ApplicationRequirement(Requirement):
     def check(self, config):
         pass
 
 @singleton
+
 class ArtifactRepository:
 
     artifact_templates = {}
@@ -53,3 +72,4 @@ def require_artifact(cls, artifact_template_name, artifact_version=None, artifac
     def wrapper(cls):
         # if not hasattr(cls, '__requrements__')
         pass
+
