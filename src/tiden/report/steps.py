@@ -143,7 +143,8 @@ class Step:
         self.stacktrace = ""
 
     def __enter__(self):
-        log_print(f'Step {self.name} started', color='debug')
+        if getattr(self.cls, 'config', False) and 'WardReport' in self.cls.config.get('plugins', []):
+            log_print(f'Step {self.name} started', color='debug')
         if self.report_exist:
             report: InnerReportConfig = getattr(self.cls, '_secret_report_storage', None)
             self.unique = report.start_step(self.name, self.parameters)
@@ -155,7 +156,8 @@ class Step:
         self.status = False
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        log_print(f'Step {self.name} ended', color='debug')
+        if getattr(self.cls, 'config', False) and 'WardReport' in self.cls.config.get('plugins', []):
+            log_print(f'Step {self.name} ended', color='debug')
         if self.report_exist:
             report: InnerReportConfig = getattr(self.cls, '_secret_report_storage', None)
             step_result = exc_type is None if self.status is None else self.status
