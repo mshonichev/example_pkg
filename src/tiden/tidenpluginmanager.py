@@ -126,3 +126,13 @@ class PluginManager:
                 log_print('Plugin %s failed in %s: %s' % (name, point, str(e)), color='red')
         return check_result
 
+    def do_filter(self, point, *args, **kwargs):
+        plugin_result = args
+        for name in self.plugins.keys():
+            try:
+                plugin_result = getattr(self.plugins[name]['instance'], point)(*args, **kwargs)
+                args = plugin_result
+            except TidenPluginException as e:
+                log_print('Plugin %s failed in %s: %s' % (name, point, str(e)), color='red')
+        return plugin_result
+

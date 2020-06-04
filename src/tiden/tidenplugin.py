@@ -50,6 +50,9 @@ class TidenPlugin:
     def before_prepare_artifacts(self, *args, **kwargs):
         pass
 
+    def after_config_loaded(self, *args, **kwargs):
+        return args
+
     def before_hosts_setup(self, *args, **kwargs):
         pass
 
