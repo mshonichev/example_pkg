@@ -6,6 +6,9 @@ requests>=2.18.4
 ansible>=2.6.1
 py4j>=0.10.7
 
+# for preparing apache ignite builds
+gitpython
+
 # for graphs generation in tests and zabbix plugin
 #cython>0.28
 #pandas==0.20.3

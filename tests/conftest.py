@@ -23,7 +23,6 @@ from os import cpu_count
 import pytest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'bin')))
 
 
 def check_runtests_protocol(module_name, short_name, _config=None):
@@ -52,8 +51,8 @@ def check_runtests_protocol(module_name, short_name, _config=None):
 
     return test_class
 
-@pytest.fixture
 
+@pytest.fixture
 def local_config():
     config = {
         'environment': {
@@ -84,8 +83,8 @@ def local_config():
         config['ssh']['env_vars'] = config['environment']['env_vars']
     return config
 
-@pytest.fixture
 
+@pytest.fixture
 def with_dec_classpath(request):
     """
     This fixture temporary pulls in 'tiden/tests/res/decorators' folder to Python Path, thus allowing to import modules
@@ -106,8 +105,8 @@ def with_dec_classpath(request):
     for imported_module in imported_modules:
         del sys.modules[imported_module]
 
-@pytest.fixture
 
+@pytest.fixture
 def mock_pm(request):
     class MockPluginManager:
         def do(self, method, *args, **kwargs):

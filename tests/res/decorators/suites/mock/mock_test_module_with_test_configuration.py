@@ -19,12 +19,12 @@ from tiden.util import require
 from tiden.testconfig import test_config
 from time import sleep
 
+
 @test_configuration([
     'pitr_enabled',
     'compaction_enabled',
     'zookeeper_enabled'
 ])
-
 class MockTestModuleWithTestConfiguration:
     """
     Example test class with few boolean configuration options. Options are detected as boolean when their name ends with

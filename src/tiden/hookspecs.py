@@ -18,8 +18,8 @@ import pluggy
 
 hookspec = pluggy.HookspecMarker("tiden")
 
-@hookspec
 
+@hookspec
 def tiden_get_applications_path():
     """
     Return list of applications packages search path (import prefixes).
@@ -28,8 +28,8 @@ def tiden_get_applications_path():
     ["tiden.apps.", "apps"]
     """
 
-@hookspec
 
+@hookspec
 def tiden_get_plugins_path():
     """
     Return list of plugins search path (actual file system paths).
@@ -38,3 +38,14 @@ def tiden_get_plugins_path():
     [<tiden install path>/plugins, <current working directory>/plugins]
     """
 
+@hookspec
+def tiden_get_entry_points():
+    """
+    Return dictionary of tiden entry point packages.
+
+    Default: {
+        'run-tests': 'tiden.console.entry_points.run_tests',
+        'merge-reports': 'tiden.console.entry_points.merge_yaml_reports',
+        'prepare-apache-builds': 'tiden.console.entry_points.prepare_apache_builds',
+    }
+    """

@@ -15,7 +15,7 @@
 # limitations under the License.
 
 from math import sqrt, floor
-from optparse import OptionParser
+from optparse import OptionParser, SUPPRESS_USAGE
 from os import cpu_count, getcwd
 from os.path import abspath
 import sys
@@ -43,6 +43,19 @@ class ConnectionMode(Enum):
     ANSIBLE = 'ansible'
 
 
+def create_parser():
+    # Parse command-line arguments
+    parser = OptionParser(usage=SUPPRESS_USAGE, add_help_option=False)
+    parser.add_option("--ts", action='store', default=None)
+    parser.add_option("--tc", action='append', default=[])
+    parser.add_option("--var_dir", action='store', default=None)
+    parser.add_option("--to", action='append', default=[])
+    parser.add_option("--clean", action='store', default='')
+    parser.add_option("--attr", action='append', default=[])
+    parser.add_option("--collect-only", action='store_true', default=False)
+    return parser
+
+
 def process_args():
     global logger
     global collect_only
@@ -61,15 +74,7 @@ def process_args():
         'xunit_file': 'xunit.xml',
         'artifacts_hash': 'artifacts_hash.yaml'
     }
-    # Parse command-line arguments
-    parser = OptionParser()
-    parser.add_option("--ts", action='store', default=None)
-    parser.add_option("--tc", action='append', default=[])
-    parser.add_option("--var_dir", action='store', default=None)
-    parser.add_option("--to", action='append', default=[])
-    parser.add_option("--clean", action='store', default='')
-    parser.add_option("--attr", action='append', default=[])
-    parser.add_option("--collect-only", action='store_true', default=False)
+    parser = get_option_parser()
     options, args = parser.parse_args()
     collect_only = options.collect_only
 
@@ -273,8 +278,10 @@ def init_ssh_pool(config):
     return ssh_pool
 
 
-# Main
-if __name__ == '__main__':
+def main():
+    """
+    Run Tiden tests
+    """
     log_print("*** Initialization ***", color='blue')
     log_print('(c) 2017-{} GridGain Systems. All Rights Reserved'.format(max(datetime.now().year, 2019)))
     log_print(version)
@@ -344,3 +351,7 @@ if __name__ == '__main__':
 
     if exit_code:
         exit(exit_code)
+
+
+if __name__ == '__main__':
+    main()

@@ -16,6 +16,7 @@
 
 from tiden.configuration_decorator import test_configuration
 
+
 @test_configuration([
     'pitr_enabled',
     'compaction_enabled',
@@ -27,7 +28,6 @@ from tiden.configuration_decorator import test_configuration
     [True, True, False, 0.1],
     [True, False, False, 1.0],
 ])
-
 class MockTestModuleWithTestConfigurationSubset:
     """
     Example test class with limited set of configurations

@@ -16,16 +16,22 @@
 
 from . import hookimpl
 
-@hookimpl
 
+@hookimpl
 def tiden_get_applications_path():
     return ["tiden.apps.", "apps."]
 
-@hookimpl
 
+@hookimpl
 def tiden_get_plugins_path():
     from os.path import dirname, abspath, join
     from os import getcwd
 
     return [join(dirname(abspath(__file__)), "plugins"), join(abspath(getcwd()), "plugins")]
+
+
+@hookimpl
+def tiden_get_entry_points():
+    from .console.main import allowed_commands
+    return allowed_commands
 
