@@ -68,3 +68,6 @@ env.bak/
 venv.bak/
 
 .idea
+
+# unit testing output
+attr.yaml
