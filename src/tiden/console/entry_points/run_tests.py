@@ -1,7 +1,21 @@
 #!/usr/bin/env python3
+#
+# Copyright 2017-2020 GridGain Systems.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from math import sqrt, floor
-from optparse import OptionParser
+from optparse import OptionParser, SUPPRESS_USAGE
 from os import cpu_count, getcwd
 from os.path import abspath
 import sys
@@ -17,14 +31,29 @@ from tiden.tidenfabric import TidenFabric
 from tiden.tidenrunner import TidenRunner
 
 from tiden.__version__ import __version__
+
 version = 'Tiden ' + __version__
 
 collect_only = False
+
 
 class ConnectionMode(Enum):
     SSH = 'paramiko'
     LOCAL = 'local'
     ANSIBLE = 'ansible'
+
+
+def create_parser():
+    # Parse command-line arguments
+    parser = OptionParser(usage=SUPPRESS_USAGE, add_help_option=False)
+    parser.add_option("--ts", action='store', default=None)
+    parser.add_option("--tc", action='append', default=[])
+    parser.add_option("--var_dir", action='store', default=None)
+    parser.add_option("--to", action='append', default=[])
+    parser.add_option("--clean", action='store', default='')
+    parser.add_option("--attr", action='append', default=[])
+    parser.add_option("--collect-only", action='store_true', default=False)
+    return parser
 
 
 def process_args():
@@ -45,15 +74,7 @@ def process_args():
         'xunit_file': 'xunit.xml',
         'artifacts_hash': 'artifacts_hash.yaml'
     }
-    # Parse command-line arguments
-    parser = OptionParser()
-    parser.add_option("--ts", action='store', default=None)
-    parser.add_option("--tc", action='append', default=[])
-    parser.add_option("--var_dir", action='store', default=None)
-    parser.add_option("--to", action='append', default=[])
-    parser.add_option("--clean", action='store', default='')
-    parser.add_option("--attr", action='append', default=[])
-    parser.add_option("--collect-only", action='store_true', default=False)
+    parser = get_option_parser()
     options, args = parser.parse_args()
     collect_only = options.collect_only
 
@@ -91,12 +112,8 @@ def process_args():
 
     # Force property's config
     for force_arg in options.to:
-        # if argument contain "=" character then just put quotes like  key='value'
-        string_args = search("^(.+)=\.(.*)\.$", force_arg)
-        if string_args:
-            option_name, option_value = string_args.group(1), string_args.group(2)
-        else:
-            option_name, option_value = force_arg.split('=')
+        # Handle force_arg values such as "environment.server_jvm_options=-DIGNITE_QUIET=false"
+        option_name, option_value = force_arg.split('=', 1)
         cfg(config, option_name, option_value)
         # self.logger.log("Configuration option %s=%s" % (option_name, option_value), 1)
     config['suite_name'] = None
@@ -117,7 +134,7 @@ def process_args():
     if collect_only:
         config['dir_prefix'] = f"collect-{strftime('%y%m%d-%H%M%S')}"
     else:
-        config['dir_prefix'] = "{}-{}" .format(config['suite_name'], strftime("%y%m%d-%H%M%S"))
+        config['dir_prefix'] = "{}-{}".format(config['suite_name'], strftime("%y%m%d-%H%M%S"))
 
     con_mode = config.get("connection_mode", "ssh")
     con_mode_found = [mode.value for mode in ConnectionMode if mode.name.lower() == con_mode]
@@ -138,12 +155,14 @@ def process_args():
     _fixup_hosts(config)
     return config
 
+
 def _fixup_hosts(config):
     """
     Ensure that all existing xxx_hosts configuration options are really arrays of hosts.
     :param config:
     :return:
     """
+
     def _fixup_hosts_config_option(cfg, option_name):
         """
         fixup given xxx_hosts configuration option to be array of hosts
@@ -259,8 +278,10 @@ def init_ssh_pool(config):
     return ssh_pool
 
 
-# Main
-if __name__ == '__main__':
+def main():
+    """
+    Run Tiden tests
+    """
     log_print("*** Initialization ***", color='blue')
     log_print('(c) 2017-{} GridGain Systems. All Rights Reserved'.format(max(datetime.now().year, 2019)))
     log_print(version)
@@ -330,3 +351,7 @@ if __name__ == '__main__':
 
     if exit_code:
         exit(exit_code)
+
+
+if __name__ == '__main__':
+    main()

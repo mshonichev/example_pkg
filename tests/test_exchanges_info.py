@@ -1,3 +1,18 @@
+#!/usr/bin/env python3
+#
+# Copyright 2017-2020 GridGain Systems.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import sys
 
@@ -5,10 +20,12 @@ from tiden.util import read_yaml_file, prettydict
 from os.path import join, dirname
 from tiden.apps.ignite.exchange_info import ExchangesCollection
 
+
 def test_log_timestamp():
     t = ExchangesCollection._parse_ignite_log_time('11:31:37,998')
     assert str(t) == '11:31:37,998'
     assert t == 41497998
+
 
 def _get_test_file_name(index, name):
     return join(dirname(__file__), 'res', 'exchanges', name + '.' + str(index) + '.yaml')
@@ -178,6 +195,7 @@ exch_test_data = {
     },
 }
 
+
 def _get_test_data(exch_test):
     print('Test data set #%s' % exch_test)
 
@@ -186,6 +204,7 @@ def _get_test_data(exch_test):
     merge_exch = read_yaml_file(_get_test_file_name(exch_test, 'merge_exch'))
 
     return ExchangesCollection.create_from_log_data(start_exch, finish_exch, merge_exch)
+
 
 def test_exchange_info_names():
     for exch_test in exch_test_data.keys():
@@ -203,11 +222,13 @@ def test_exchange_info_names():
             assert exchange is not None
             assert exch_name == str(exchange)
 
+
 def test_exchange_info_get_non_existent_exchange():
     for exch_test in exch_test_data.keys():
         exchanges = _get_test_data(exch_test)
         assert exchanges.get_exchange(100, 1) is None
         break
+
 
 def test_exchange_info_merged():
     for exch_test in exch_test_data.keys():
@@ -223,6 +244,7 @@ def test_exchange_info_merged():
                 assert expect_merged == exchange.merged, "Exchange %s expected merged to be %s" % (exchange, expect_merged)
                 assert set(merged_exchanges) == exchange.merged_exchanges
 
+
 def test_exchange_info_finished():
     for exch_test in exch_test_data.keys():
         exchanges = _get_test_data(exch_test)
@@ -237,6 +259,7 @@ def test_exchange_info_finished():
                     name=exchange,
                     expect='expected' if expect_exchange_finished else 'NOT expected'
                 )
+
 
 def test_exchange_info_x1_time():
     for exch_test in exch_test_data.keys():
@@ -258,6 +281,7 @@ def test_exchange_info_x2_time():
                 expect_exchange_x2_time = exch_test_data[exch_test]['exchange_x2_time'][k]
                 exchange_x2_time = exchanges.get_exchange_x2_time(major_topVer, minor_topVer)
                 assert expect_exchange_x2_time == exchange_x2_time
+
 
 def test_exchange_info_grep_logs():
     from tiden.apps.ignite import Ignite
@@ -359,7 +383,6 @@ def test_exchange_info_grep_logs():
 
             return {host: output}
 
-
     config = {
         'environment': {
 
@@ -373,3 +396,4 @@ def test_exchange_info_grep_logs():
 
     ex = ExchangesCollection.get_exchanges_from_logs(ignite, 'alive_server')
     print(prettydict(ex))
+

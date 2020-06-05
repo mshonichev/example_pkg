@@ -1,4 +1,18 @@
 #!/usr/bin/env python3
+#
+# Copyright 2017-2020 GridGain Systems.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from time import time
 from .util import exec_time, make_number, log_print
@@ -7,6 +21,7 @@ import xml.etree.ElementTree as ET
 import re
 from os import path
 from copy import deepcopy
+
 
 class Result:
     re_escape_seq = re.compile(r'(\x1b\[|\x9b)[^@-_]*[@-_]|\x1b[@-_]', re.I)
@@ -446,6 +461,7 @@ class Result:
         full_class_name = self.tests.get(old_name).get('classname')
         self.tests['{}.{}'.format(full_class_name, new_name)] = self.tests.pop(old_name)
 
+
 class ResultLinesCollector:
     def __init__(self, config):
         self.config = config
@@ -459,3 +475,4 @@ class ResultLinesCollector:
 
     def get_lines(self):
         return self.lines
+

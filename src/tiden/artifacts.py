@@ -1,3 +1,19 @@
+#!/usr/bin/env python3
+#
+# Copyright 2017-2020 GridGain Systems.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import hashlib
 import os.path
 import tarfile
@@ -130,6 +146,10 @@ def copy_artifacts(changed_artifacts, config):
     for artifact_name in config.get('artifacts', {}).keys():
         # copy artifacts
         pattern = config['artifacts'][artifact_name]['glob_path']
+
+        if pattern.startswith('ftp'):
+            continue
+
         found_files = glob(pattern)
         assert len(found_files) == 1, \
             "Found {} artifacts by pattern {}. Expected: 1".format(len(found_files), pattern)
@@ -207,6 +227,9 @@ def repack_and_get_command_to_unzip(previous_artifacts_config, copied_artifacts,
     command = []
     config_changes = {}
     for artifact_name in config.get('artifacts', {}).keys():
+        if config['artifacts'][artifact_name]['glob_path'].startswith('ftp'):
+            continue
+
         for source_file in glob(config['artifacts'][artifact_name]['glob_path']):
 
             # new path for artifact
@@ -478,8 +501,10 @@ def repack(artifact_name, src_path, checksum, work_dir, rules, artifacts_dir, ar
         raise e
     return results
 
+
 def _expand_globs(pattern):
     return glob(pattern)
+
 
 def _parse_args(args, extract_dir, artifacts_dir, current_artifact_name, artifacts, self_entry):
     """
@@ -553,3 +578,4 @@ def _parse_args(args, extract_dir, artifacts_dir, current_artifact_name, artifac
 
         new_args.append(new_path)
     return new_args, dirs_to_delete
+

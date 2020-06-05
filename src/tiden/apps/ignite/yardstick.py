@@ -1,4 +1,18 @@
 #!/usr/bin/env python3
+#
+# Copyright 2017-2020 GridGain Systems.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 # from ..app import App
 from ..nodestatus import NodeStatus
@@ -27,8 +41,9 @@ class Yardstick:  # (App):
         self.class_paths = []
         for lib_dir in ['libs', 'libs/ignite-spring', 'libs/ignite-indexing', 'benchmarks/libs', 'libs/yardstick']:
             self.class_paths.append("%s/%s/*" % (self.ignite.client_ignite_home, lib_dir))
+        self.driver_hosts = self.ignite.config['environment']['client_hosts']  # Should be a set?
         self.drivers_count = len(
-            self.ignite.config['environment']['client_hosts']*self.ignite.config['environment'].get('clients_per_host', 1)
+            self.driver_hosts * self.ignite.config['environment'].get('clients_per_host', 1)
         )
         self.cmd_args_str = None
         self.jvm_opts_str = None
@@ -152,3 +167,23 @@ class Yardstick:  # (App):
             for id in driver_nodes:
                 del self.ignite.nodes[id]
 
+    def draw_charts(self):
+        log_print(f"Drawing charts for {self.ignite.name}...")
+
+        test_dir = self.method_home
+        ignite_home = self.ignite.client_ignite_home
+
+        cmd = f"bash {ignite_home}/benchmarks/bin/jfreechart-graph-gen.sh -gm STANDARD -i {test_dir}/{self.ignite.name}.*"
+        log_print(cmd, color='debug')
+        cmds = {}
+        for host in self.driver_hosts:
+            if not cmds.get(host):
+                cmds[host] = [cmd]
+            else:
+                cmds[host].append(cmd)
+
+        outputs = self.ignite.ssh.exec(cmds)
+
+        for host, out in outputs.items():
+            log_print(f"{host}:")
+            log_print(f"{''.join(out)}")

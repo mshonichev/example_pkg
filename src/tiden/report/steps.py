@@ -1,3 +1,19 @@
+#!/usr/bin/env python3
+#
+# Copyright 2017-2020 GridGain Systems.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import inspect
 from copy import deepcopy
 from datetime import datetime
@@ -83,7 +99,6 @@ class InnerReportConfig:
             new_steps.append(step_item)
         return new_steps, added
 
-
     def _end_step(self, steps, step_id, status, stacktrace):
         new_steps = []
         for step_item in deepcopy(steps):
@@ -128,7 +143,8 @@ class Step:
         self.stacktrace = ""
 
     def __enter__(self):
-        log_print(f'Step {self.name} started', color='debug')
+        if getattr(self.cls, 'config', False) and 'WardReport' in self.cls.config.get('plugins', []):
+            log_print(f'Step {self.name} started', color='debug')
         if self.report_exist:
             report: InnerReportConfig = getattr(self.cls, '_secret_report_storage', None)
             self.unique = report.start_step(self.name, self.parameters)
@@ -140,7 +156,8 @@ class Step:
         self.status = False
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        log_print(f'Step {self.name} ended', color='debug')
+        if getattr(self.cls, 'config', False) and 'WardReport' in self.cls.config.get('plugins', []):
+            log_print(f'Step {self.name} ended', color='debug')
         if self.report_exist:
             report: InnerReportConfig = getattr(self.cls, '_secret_report_storage', None)
             step_result = exc_type is None if self.status is None else self.status
@@ -351,3 +368,4 @@ def get_params(base, args, kwargs, fn):
         return base.format(**format_params)
     else:
         return base
+

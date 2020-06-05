@@ -1,4 +1,18 @@
 #!/usr/bin/env python3
+#
+# Copyright 2017-2020 GridGain Systems.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from hashlib import md5
 from multiprocessing.dummy import Pool as ThreadPool
@@ -12,6 +26,7 @@ from .util import log_print, log_put, log_add, get_logger
 from os import path
 from .tidenexception import RemoteOperationTimeout,TidenException
 from random import choice
+
 
 class AbstractSshPool:
     def __init__(self, ssh_config=None, **kwargs):
@@ -256,6 +271,9 @@ class SshPool(AbstractSshPool):
                 for line in stdout:
                     if line.strip() != '':
                         command_output += line
+                for line in stderr:
+                    if line.strip() != '':
+                        command_output += line
                 output.append(command_output)
                 formatted_output = ''.join(output).encode('utf-8')
                 get_logger('ssh_pool').debug(f'{host} << {formatted_output}')
@@ -327,6 +345,20 @@ class SshPool(AbstractSshPool):
                 m = search('^([0-9\w]+)\s+([0-9]+)', line)
                 if m:
                     results.append({'host': host, 'owner': m.group(1), 'pid': m.group(2)})
+        return results
+
+    def ls(self, hosts=None, dir_path=None, params=None):
+        ls_cmd = 'ls' if not params else 'ls {}'.format(params)
+        ls_command = ['{}'.format(ls_cmd)] if not dir_path else ['{} {}'.format(ls_cmd, dir_path)]
+
+        if hosts:
+            ls_command = {host: ls_command for host in hosts}
+
+        raw_results = self.exec(ls_command)
+        results = {}
+        for host in raw_results.keys():
+            results[host] = raw_results[host][0].split('\n')
+
         return results
 
     def jps(self, jps_args=None, hosts=None, skip_reserved_java_processes=True):
@@ -479,3 +511,4 @@ class SshPool(AbstractSshPool):
         res = self.exec(kill_command)
         # print_blue(res)
         return res
+

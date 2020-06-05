@@ -1,10 +1,25 @@
 #!/usr/bin/env python3
+#
+# Copyright 2017-2020 GridGain Systems.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import pytest
 from tiden.tidenfabric import TidenFabric
 from tiden.tidenconfig import TidenConfig
 
 @pytest.fixture
+
 def example_dict_config():
     c = {
         'clean': True,
@@ -43,6 +58,7 @@ def test_fabric_simple(example_dict_config):
     assert not config.ignite.baseline_enabled, "baseline_enabled should be False"
     assert not config.unknown_option_enabled, "unknown_option_enabled should be equal to False"
 
+
 def test_fabric_not_assigned_option(example_dict_config):
     config = TidenFabric().setConfig(example_dict_config)
 
@@ -72,8 +88,10 @@ def test_fabric_not_assigned_option(example_dict_config):
     assert option1 is None
 
 @pytest.fixture
+
 def clean_fabric():
     TidenFabric().reset()
+
 
 def test_fabric_update_dict_after_create(example_dict_config, clean_fabric):
     c = example_dict_config.copy()
@@ -97,3 +115,4 @@ def test_fabric_update_dict_after_create(example_dict_config, clean_fabric):
     }
     assert 42 == config.simple
     assert '1.0.0' == config.artifacts.test_artifact.version
+

@@ -1,4 +1,4 @@
-# Tiden 0.6.0
+# Tiden 0.6.2
 
 ## 1. What is Tiden?
 
@@ -26,7 +26,7 @@ java processes by `sudo killall -9 java`. Thus you must add killall to sudoers l
 ## 3. Command-line arguments.
 
 ```bash
-run_tests.py \
+tiden run-tests \
   --tc=<path_to_configuration_file> \
   --tc=<path_to_configuration_file> \
   --to=<option_path>=<option_value> \
@@ -99,14 +99,14 @@ key1:
 If the original value is the list then new value can be provided as the string of values delimited by commas:
 
 ```bash
-run_tests.py ... --to=<key_path>=value1,value2,value3
+tiden run-tests ... --to=<key_path>=value1,value2,value3
 ```
 
 If you provide the `+` symbol before the list of values, then these values will be appended to ones already 
 set for the given configuration option:
 
 ```bash
-run_tests.py ... --to=<key_path>=+value1,value2,value3
+tiden run-tests ... --to=<key_path>=+value1,value2,value3
 ```
 
 ##### Clean
@@ -150,7 +150,7 @@ but do not run any tests. Note, that artifacts are still processed and repacked 
 * The rules to create a test:
 
 1. Create a python module prefixed by `test_` (and in lower case) 
-in the chosed suite directory.
+in the chosen suite directory.
 2. The created test python module must contain single class only.
 3. The name of module must reflect the name of class: `test_new_feature.py` to
 `TestNewFeature` class.
