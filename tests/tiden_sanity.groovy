@@ -20,9 +20,9 @@ configsToPatch = [
 ]
 
 // Pipeline properties
-displayName('Tiden package sanity tests')
-
 properties([
+        displayName('Tiden package sanity tests'), 
+
         githubProjectUrl(env.TIDEN_PKG_REPO),
 
         buildDiscarder(
