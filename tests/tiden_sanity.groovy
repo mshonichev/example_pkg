@@ -136,7 +136,7 @@ pip install -r requirements.txt
                     sh script: '''#!/usr/bin/env bash
 set -ex
 source .venv/bin/activate
-py.test tests --showlocals -x -W ignore --tb=long --junitxml=var/xunit.xml --nf -o cache_dir=var/.pytest_cache --basedir var
+py.test tests --showlocals -x -W ignore --tb=long --junitxml=var/xunit.xml --nf -o cache_dir=var/.pytest_cache --basetemp var
 '''
                 }
             }
