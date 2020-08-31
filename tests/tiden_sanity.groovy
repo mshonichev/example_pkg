@@ -144,10 +144,10 @@ py.test tests --showlocals -x -W ignore --tb=long --junitxml=var/xunit.xml --nf 
         finally {
             stage("Post test results") {
                 archiveArtifacts allowEmptyArchive: true,
-                    artifacts: 'var/**/*',
-                    excludes: 'var/**/artifacts/*',
+                    artifacts: "var/**/*",
+                    excludes: "var/**/artifacts/*, var/**/.pytest_cache",
                     followSymlinks: false
-                 junit 'var/xunit*.xml'
+                 junit "var/xunit*.xml"
             }
         }
 //        }
