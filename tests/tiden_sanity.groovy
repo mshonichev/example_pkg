@@ -89,6 +89,7 @@ node {
                 ]]*/
     }
 
+    dir(env.TIDEN_PKG_CHECKOUT_DIR) {
     stage("Prepare") {
         // Prepare directories
         fileOperations([
@@ -100,16 +101,16 @@ node {
                 folderCreateOperation('.venv')
         ])
 
-        dir(env.TIDEN_PKG_CHECKOUT_DIR) {
             // Prepare Python venv
             stage("Init venv") {
                 withEnv(["PYTHON_UNBUFFERED=1"]) {
                     sh script: '''#!/usr/bin/env bash
-set -e
+set -ex
 python3 --version
 pip3 --version
 python3 -m venv --system-site-packages .venv
 source .venv/bin/activate
+pip --version
 pip install -U pip wheel
 pip --version
 
@@ -118,17 +119,21 @@ pip install -r requirements.txt
 '''
                 }
             }
-    }
     stage("Run unit tests") {
-        dir(env.TIDEN_PKG_CHECKOUT_DIR) {
+//        dir(env.TIDEN_PKG_CHECKOUT_DIR) {
             withEnv(["PYTHON_UNBUFFERED=1"]) {
+try {
                 sh script: '''#!/usr/bin/env bash
-set -e
+set -ex
 source .venv/bin/activate
-py.test tests -x
+py.test tests -s --showlocals -x -W ignore --tb=long --junitxml=var/xunit.xml --nf
 '''
+}
+finally {
+sh 'ls -la var'
+}
             }
-        }
+//        }
     }
 /*
             stage("Prepare work dir") {
@@ -164,6 +169,7 @@ bash \\
         echo "All tasks $tasks"
 //        parallel(tasks)
     }*/
+    }
 }
 
 /*
