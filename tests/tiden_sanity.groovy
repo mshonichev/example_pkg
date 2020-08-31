@@ -108,7 +108,7 @@ node {
 set -e
 python3 --version
 pip3 --version
-python3 -m venv --system-wide-packages .venv
+python3 -m venv --system-site-packages .venv
 source .venv/bin/activate
 pip install -U pip wheel
 pip --version
