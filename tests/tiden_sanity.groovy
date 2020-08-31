@@ -103,7 +103,7 @@ node {
         }
 
         // Prepare Python venv
-        stage("Init venv") {
+        stage("Init Virtual Env") {
             withEnv(["PYTHON_UNBUFFERED=1"]) {
                 sh script: '''#!/usr/bin/env bash
 set -ex
@@ -114,8 +114,15 @@ source .venv/bin/activate
 pip --version
 pip install -U pip wheel
 pip --version
-
 pip install -U pytest
+'''
+            }
+        }
+
+        stage("Setup Tiden requirements") {
+            withEnv(["PYTHON_UNBUFFERED=1"]) {
+                sh script: '''#!/usr/bin/env bash
+set -ex
 pip install -r requirements.txt
 '''
             }
@@ -127,14 +134,18 @@ pip install -r requirements.txt
                     sh script: '''#!/usr/bin/env bash
 set -ex
 source .venv/bin/activate
-py.test tests -s --showlocals -x -W ignore --tb=long --junitxml=var/xunit.xml --nf
+py.test tests -s --showlocals -x -W ignore --tb=long --junitxml=var/xunit.xml --nf -o cache_dir=var/.pytest_cache --basedir var
 '''
                 }
             }
         }
         finally {
             stage("Post test results") {
-                sh 'ls -la var'
+                archiveArtifacts allowEmptyArchive: true,
+                    artifacts: 'var/**/*',
+                    excludes: 'var/**/artifacts/*',
+                    followSymlinks: false
+                 junit 'var/**/*.xml'
             }
         }
 //        }
