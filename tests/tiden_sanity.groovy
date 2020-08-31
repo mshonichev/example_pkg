@@ -21,8 +21,6 @@ configsToPatch = [
 
 // Pipeline properties
 properties([
-        displayName('Tiden package sanity tests'), 
-
         githubProjectUrl(env.TIDEN_PKG_REPO),
 
         buildDiscarder(
@@ -41,9 +39,7 @@ properties([
                 string(name: 'TIDEN_GG_PKG_BRANCH', defaultValue: 'master',
                         description: 'Branch in the ggprivate/tiden_gridgain_pkg repo.'),
                 string(name: 'TIDEN_GG_SUITES_BRANCH', defaultValue: 'master',
-                        description: 'Branch in the ggprivate/tiden-gridgain-suites repo.'),
-                string(name: 'CODE', defaultValue: '',
-                        description: 'Encoded actions list to retry special test combination')
+                        description: 'Branch in the ggprivate/tiden-gridgain-suites repo.')
         ])
 ])
 
