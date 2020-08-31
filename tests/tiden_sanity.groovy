@@ -21,7 +21,7 @@ configsToPatch = [
 
 // Pipeline properties
 properties([
-        githubProjectUrl(env.TIDEN_PKG_REPO),
+        [$class: 'GithubProjectProperty', projectUrlStr: 'https://github.com/mshonichev/tiden_pkg.git'],
 
         buildDiscarder(
                 logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')
@@ -60,7 +60,7 @@ node {
                 ],
                 submoduleCfg: [],
                 userRemoteConfigs: [
-                        [credentialsId: '0cc82f1a-e7dc-4db2-9774-7adfbd238b9b', url: 'https://github.com/ggprivate/tiden-gridgain-suites.git']
+                        [credentialsId: env.GITHUB_CREDENTIALS_ID, url: env.TIDEN_GG_SUITES_REPO]
                 ]
         ]*/
         checkout poll: false, scm: [
@@ -80,12 +80,12 @@ node {
                 branches: [[name: params.TIDEN_GG_PKG_BRANCH]],
                 doGenerateSubmoduleConfigurations: false,
                 extensions: [
-                        [$class: 'RelativeTargetDirectory', relativeTargetDir: env.TIDEN_PKG_CHECKOUT_DIR],
+                        [$class: 'RelativeTargetDirectory', relativeTargetDir: env.TIDEN_GG_PKG_CHECKOUT_DIR],
                         [$class: 'CleanBeforeCheckout']
                 ],
                 submoduleCfg: [],
                 userRemoteConfigs: [
-                        [credentialsId: '0cc82f1a-e7dc-4db2-9774-7adfbd238b9b', url: 'https://github.com/ggprivate/tiden_gridgain_pkg.git']
+                        [credentialsId: env.GITHUB_CREDENTIALS_ID, url: env.TIDEN_GG_PKG_REPO]
                 ]]*/
     }
 
@@ -94,15 +94,36 @@ node {
         fileOperations([
                 folderDeleteOperation('work'),
                 folderDeleteOperation('var'),
+                folderDeleteOperation('.venv'),
                 folderCreateOperation('work'),
                 folderCreateOperation('var')
+                folderCreateOperation('.venv')
         ])
 
-        dir(env.TIDEN_GG_SUITES_CHECKOUT_DIR) {
+        dir(env.TIDEN_GG_PKG_CHECKOUT_DIR) {
             // Prepare Python venv
             stage("Init venv") {
-                withEnv(["SRC_ROOT=${WORKSPACE}"]) {
-                    sh 'bash -e ./venv-init.sh'
+                withEnv(["PYTHON_UNBUFFERED=1"]) {
+                    sh script: '''#!/usr/bin/env bash
+set -e
+python3 --version
+pip3 --version
+python3 -m venv .venv
+source .venv/bin/activate
+pip --version
+
+pip install -U pytest
+pip install -r requirements.txt
+'''
+                }
+            }
+            stage("Run unit tests") {
+                withEnv(["PYTHON_UNBUFFERED=1"]) {
+                    sh script: '''#!/usr/bin/env bash
+set -e
+source .venv/bin/activate
+py.test tests -x
+'''
                 }
             }
 /*
@@ -134,11 +155,11 @@ bash \\
         }
     }
 
-    stage("Run") {
+/*    stage("Run") {
 //        Map tasks = prepareTasks()
         echo "All tasks $tasks"
 //        parallel(tasks)
-    }
+    }*/
 }
 
 /*
