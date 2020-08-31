@@ -123,6 +123,8 @@ pip install -U pytest
             withEnv(["PYTHON_UNBUFFERED=1"]) {
                 sh script: '''#!/usr/bin/env bash
 set -ex
+source .venv/bin/activate
+
 pip install -r requirements.txt
 '''
             }
@@ -134,7 +136,7 @@ pip install -r requirements.txt
                     sh script: '''#!/usr/bin/env bash
 set -ex
 source .venv/bin/activate
-py.test tests -s --showlocals -x -W ignore --tb=long --junitxml=var/xunit.xml --nf -o cache_dir=var/.pytest_cache --basedir var
+py.test tests --showlocals -x -W ignore --tb=long --junitxml=var/xunit.xml --nf -o cache_dir=var/.pytest_cache --basedir var
 '''
                 }
             }
