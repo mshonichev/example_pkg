@@ -100,7 +100,7 @@ node {
                 folderCreateOperation('.venv')
         ])
 
-        dir(env.TIDEN_GG_PKG_CHECKOUT_DIR) {
+        dir(env.TIDEN_PKG_CHECKOUT_DIR) {
             // Prepare Python venv
             stage("Init venv") {
                 withEnv(["PYTHON_UNBUFFERED=1"]) {
@@ -110,6 +110,7 @@ python3 --version
 pip3 --version
 python3 -m venv .venv
 source .venv/bin/activate
+pip install -U pip wheel
 pip --version
 
 pip install -U pytest
