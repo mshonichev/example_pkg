@@ -69,7 +69,8 @@ node {
                 doGenerateSubmoduleConfigurations: false,
                 extensions: [
                         [$class: 'RelativeTargetDirectory', relativeTargetDir: env.TIDEN_PKG_CHECKOUT_DIR],
-                        [$class: 'CleanBeforeCheckout']
+                        [$class: 'CleanBeforeCheckout'],
+                        [$class: 'ChangelogToBranch', options: [compareRemote: 'origin', compareBranch: 'master']]
                 ],
                 submoduleCfg: [],
                 userRemoteConfigs: [
@@ -89,13 +90,10 @@ node {
                 ]]*/
     }
 
-    dir(env.TIDEN_PKG_CHECKOUT_DIR) {
+//    dir(env.TIDEN_PKG_CHECKOUT_DIR) {
         // Prepare directories
         stage("Prepare") {
             fileOperations([
-                    folderDeleteOperation('work'),
-                    folderDeleteOperation('var'),
-                    folderDeleteOperation('.venv'),
                     folderCreateOperation('work'),
                     folderCreateOperation('var'),
                     folderCreateOperation('.venv')
@@ -125,7 +123,7 @@ pip install -U pytest
 set -ex
 source .venv/bin/activate
 
-pip install -r requirements.txt
+pip install -r $TIDEN_PKG_CHECKOUT_DIR/requirements.txt
 '''
             }
         }
@@ -136,6 +134,7 @@ pip install -r requirements.txt
                     sh script: '''#!/usr/bin/env bash
 set -ex
 source .venv/bin/activate
+cd $TIDEN_PKG_CHECKOUT_DIR
 py.test tests --showlocals -x -W ignore --tb=long --junitxml=var/xunit.xml --nf -o cache_dir=var/.pytest_cache --basetemp var
 '''
                 }
@@ -151,8 +150,8 @@ py.test tests --showlocals -x -W ignore --tb=long --junitxml=var/xunit.xml --nf 
             }
         }
 //        }
-    }
-}
+    } // dir
+} // node
 
 /*
             stage("Prepare work dir") {
