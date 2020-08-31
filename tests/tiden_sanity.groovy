@@ -10,7 +10,7 @@ env.TIDEN_GG_SUITES_CHECKOUT_DIR = "ggprivate/tiden-gridgain-suites"
 env.GITHUB_CREDENTIALS_ID = "0cc82f1a-e7dc-4db2-9774-7adfbd238b9b"
 env.QA_FTP_CONFIG_FILE_ID = "6fbbc991-7e18-40d3-a1b3-090fbc4dbe19"
 
-CLEAN_UP_JOB = 'util/clean-java-processes'
+CLEAN_UP_JOB = 'utils/clean-java-processes'
 
 taskParams = []
 
@@ -20,10 +20,15 @@ configsToPatch = [
 ]
 
 // Pipeline properties
+displayName('Tiden package sanity tests')
+
 properties([
+        githubProjectUrl(env.TIDEN_PKG_REPO),
+
         buildDiscarder(
                 logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')
         ),
+
         parameters([
                 string(name: 'IGNITE_VERSION', defaultValue: '8.7.24',
                         description: 'Apache Ignite version, ex. 2.5.1'),
