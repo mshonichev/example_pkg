@@ -135,7 +135,7 @@ pip install -r $TIDEN_PKG_CHECKOUT_DIR/requirements.txt
 set -ex
 source .venv/bin/activate
 cd $TIDEN_PKG_CHECKOUT_DIR
-py.test tests --showlocals -x -W ignore --tb=long --junitxml=var/xunit.xml --nf -o cache_dir=var/.pytest_cache --basetemp var
+py.test tests --showlocals -x -W ignore --tb=long --junitxml=$WORKSPACE/var/xunit.xml --nf -o cache_dir=$WORKSPACE/var/.pytest_cache --basetemp $WORKSPACE/var/tmp
 '''
                 }
             }
@@ -144,7 +144,7 @@ py.test tests --showlocals -x -W ignore --tb=long --junitxml=var/xunit.xml --nf 
             stage("Post test results") {
                 archiveArtifacts allowEmptyArchive: true,
                     artifacts: "var/**/*",
-                    excludes: "var/**/artifacts/*, var/**/.pytest_cache",
+                    excludes: "work/*.zip, work/*.tar.gz, var/**/artifacts/*, var/**/.pytest_cache, var/tmp/**/*",
                     followSymlinks: false
                  junit "var/xunit*.xml"
             }
