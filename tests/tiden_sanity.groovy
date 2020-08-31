@@ -108,7 +108,7 @@ node {
 set -e
 python3 --version
 pip3 --version
-python3 -m venv .venv
+python3 -m venv --system-wide-packages .venv
 source .venv/bin/activate
 pip install -U pip wheel
 pip --version
@@ -118,15 +118,18 @@ pip install -r requirements.txt
 '''
                 }
             }
-            stage("Run unit tests") {
-                withEnv(["PYTHON_UNBUFFERED=1"]) {
-                    sh script: '''#!/usr/bin/env bash
+    }
+    stage("Run unit tests") {
+        dir(env.TIDEN_PKG_CHECKOUT_DIR) {
+            withEnv(["PYTHON_UNBUFFERED=1"]) {
+                sh script: '''#!/usr/bin/env bash
 set -e
 source .venv/bin/activate
 py.test tests -x
 '''
-                }
             }
+        }
+    }
 /*
             stage("Prepare work dir") {
                 // Get artifacts for testing
@@ -152,9 +155,9 @@ bash \\
                 echo "Patch $configPath"
                 configContent = configContent.replaceAll("\\./work", "${env.WORKSPACE}/work")
                 writeFile(file: configPath, text: configContent)
-            }*/
+            }
         }
-    }
+    }*/
 
 /*    stage("Run") {
 //        Map tasks = prepareTasks()
