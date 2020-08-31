@@ -90,8 +90,8 @@ node {
     }
 
     dir(env.TIDEN_PKG_CHECKOUT_DIR) {
+        // Prepare directories
         stage("Prepare") {
-            // Prepare directories
             fileOperations([
                     folderDeleteOperation('work'),
                     folderDeleteOperation('var'),
@@ -100,8 +100,9 @@ node {
                     folderCreateOperation('var'),
                     folderCreateOperation('.venv')
             ])
+        }
 
-            // Prepare Python venv
+        // Prepare Python venv
         stage("Init venv") {
             withEnv(["PYTHON_UNBUFFERED=1"]) {
                 sh script: '''#!/usr/bin/env bash
@@ -132,7 +133,9 @@ py.test tests -s --showlocals -x -W ignore --tb=long --junitxml=var/xunit.xml --
             }
         }
         finally {
-            sh 'ls -la var'
+            stage("Post test results") {
+                sh 'ls -la var'
+            }
         }
 //        }
     }
