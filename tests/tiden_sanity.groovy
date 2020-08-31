@@ -96,7 +96,7 @@ node {
                 folderDeleteOperation('var'),
                 folderDeleteOperation('.venv'),
                 folderCreateOperation('work'),
-                folderCreateOperation('var')
+                folderCreateOperation('var'),
                 folderCreateOperation('.venv')
         ])
 
