@@ -150,7 +150,7 @@ py.test tests --showlocals -x -W ignore --tb=long --junitxml=var/xunit.xml --nf 
             }
         }
 //        }
-    } // dir
+//    } // dir
 } // node
 
 /*
