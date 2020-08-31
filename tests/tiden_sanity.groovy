@@ -90,21 +90,21 @@ node {
     }
 
     dir(env.TIDEN_PKG_CHECKOUT_DIR) {
-    stage("Prepare") {
-        // Prepare directories
-        fileOperations([
-                folderDeleteOperation('work'),
-                folderDeleteOperation('var'),
-                folderDeleteOperation('.venv'),
-                folderCreateOperation('work'),
-                folderCreateOperation('var'),
-                folderCreateOperation('.venv')
-        ])
+        stage("Prepare") {
+            // Prepare directories
+            fileOperations([
+                    folderDeleteOperation('work'),
+                    folderDeleteOperation('var'),
+                    folderDeleteOperation('.venv'),
+                    folderCreateOperation('work'),
+                    folderCreateOperation('var'),
+                    folderCreateOperation('.venv')
+            ])
 
             // Prepare Python venv
-            stage("Init venv") {
-                withEnv(["PYTHON_UNBUFFERED=1"]) {
-                    sh script: '''#!/usr/bin/env bash
+        stage("Init venv") {
+            withEnv(["PYTHON_UNBUFFERED=1"]) {
+                sh script: '''#!/usr/bin/env bash
 set -ex
 python3 --version
 pip3 --version
@@ -117,24 +117,27 @@ pip --version
 pip install -U pytest
 pip install -r requirements.txt
 '''
-                }
             }
-    stage("Run unit tests") {
-//        dir(env.TIDEN_PKG_CHECKOUT_DIR) {
-            withEnv(["PYTHON_UNBUFFERED=1"]) {
-try {
-                sh script: '''#!/usr/bin/env bash
+        }
+
+        try {
+            stage("Run unit tests") {
+                withEnv(["PYTHON_UNBUFFERED=1"]) {
+                    sh script: '''#!/usr/bin/env bash
 set -ex
 source .venv/bin/activate
 py.test tests -s --showlocals -x -W ignore --tb=long --junitxml=var/xunit.xml --nf
 '''
-}
-finally {
-sh 'ls -la var'
-}
+                }
             }
+        }
+        finally {
+            sh 'ls -la var'
+        }
 //        }
     }
+}
+
 /*
             stage("Prepare work dir") {
                 // Get artifacts for testing
@@ -168,10 +171,10 @@ bash \\
 //        Map tasks = prepareTasks()
         echo "All tasks $tasks"
 //        parallel(tasks)
-    }*/
+    }
     }
 }
-
+*/
 /*
 Map prepareTasks() {
     hosts = []
